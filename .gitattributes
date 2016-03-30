@@ -1,0 +1,11 @@
+* text=auto
+
+*.cs text
+
+*.json text eol=lf
+*.storyboard text eol=lf
+
+*.sln text eol=crlf
+*.csproj text eol=crlf
+
+*.png binary
