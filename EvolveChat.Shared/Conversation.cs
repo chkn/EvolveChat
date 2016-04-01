@@ -43,6 +43,15 @@ namespace EvolveChat {
 			Messages.CollectionChanged += OnMessagesChanged;
 		}
 
+		public Conversation (IEnumerable<Contact> otherParties): this ()
+		{
+			participants.AddRange (otherParties);
+		}
+
+		public Conversation (params Contact[] otherParties): this ((IEnumerable<Contact>)otherParties)
+		{
+		}
+
 		void OnMessagesChanged (object sender, NotifyCollectionChangedEventArgs e)
 		{
 			var participantsChanged = false;

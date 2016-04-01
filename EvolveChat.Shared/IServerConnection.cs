@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace EvolveChat {
 
@@ -19,10 +20,9 @@ namespace EvolveChat {
 		///  changes on the server will be propagated to the local <c>Contact</c> object
 		///  as long as the returned observable has subscriptions on it.
 		/// </remarks>
-		/// <returns>An observable that yields matching contacts. When it is first subscribed,
-		///  the observable should yield all matching contacts. On each subsequent subscription,
-		///  it should yield all contacts that were found since the last subscription.</returns>
-		IObservable<Contact> FindContacts (string searchTerm);
+		/// <returns>An observable collection of matching contacts. As more contacts are found
+		///   on the server, or as the searchTerm changes, the collection should be updated.</returns>
+		ObservableCollection<Contact> FindContacts (IObservable<string> searchTerm);
 
 		/// <summary>
 		/// Gets all conversations on the server that include the currently authenticated user.
@@ -33,10 +33,23 @@ namespace EvolveChat {
 		///  to the server, and likewise, any new messages on the server will be
 		///  propagated to the local object's <c>Messages</c> collection.
 		/// </remarks>
-		/// <returns>An observable that yields matching conversations. When it is first subscribed,
-		///  the observable should yield all matching conversations. On each subsequent subscription,
-		///  it should yield all conversations that were added since the last subscription.</returns>
-		IObservable<Conversation> GetMyConversations ();
+		/// <returns>An observable collection of matching conversations. As conversations
+		///  are started or ended on the server, the collection should be updated.</returns>
+		ObservableCollection<Conversation> GetMyConversations ();
+
+		/// <summary>
+		/// Starts or resumes a conversation with the given contact.
+		/// </summary>
+		/// <remarks>
+		/// This is a synchronization point that can be used to ensure
+		/// that we do not start multiple conversations between the same
+		/// parties. The server will create a new <c>Conversation</c> for
+		/// the first request it receives and then return that conversation
+		/// for subsequent requests for the same set of <c>Contact</c>s.
+		/// </remarks>
+		/// <returns>The conversation.</returns>
+		/// <param name="contact">Contact.</param>
+		Task<Conversation> StartConversation (params Contact [] contacts); 
 	}
 }
 

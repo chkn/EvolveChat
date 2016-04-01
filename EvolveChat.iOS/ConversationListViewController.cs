@@ -1,14 +1,13 @@
 using System;
 using System.Linq;
+using System.Collections.ObjectModel;
 
 using UIKit;
 using Foundation;
 
 namespace EvolveChat {
 
-    public partial class ConversationListViewController : ObserverTableViewController<Conversation> {
-
-		IObservable<Conversation> dataSource = App.Backend.GetMyConversations ();
+    public partial class ConversationListViewController : BoundTableViewController {
 
 		public ConversationListViewController (IntPtr handle) : base (handle)
 		{
@@ -18,18 +17,13 @@ namespace EvolveChat {
 		{
 			base.ViewDidLoad ();
 			TableView.EstimatedRowHeight = 50;
+			Binding = App.Backend.GetMyConversations ();
 		}
 
-		public override void ViewWillAppear (bool animated)
-		{
-			base.ViewWillAppear (animated);
-			DisposeOnDisappear (dataSource.Subscribe (this));
-		}
-
-		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, Conversation data)
+		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, object data)
 		{
 			var cell = (ConversationCell)tableView.DequeueReusableCell (ConversationCell.Id, indexPath);
-			cell.Conversation = data;
+			cell.Conversation = (Conversation)data;
 			return cell;
 		}
 
@@ -38,7 +32,7 @@ namespace EvolveChat {
 			base.PrepareForSegue (segue, sender);
 			if (segue.Identifier == "Edit") {
 				var dest = (ConversationViewController)segue.DestinationViewController;
-				dest.PrepareToEdit (((ConversationCell)sender).Conversation);
+				dest.Conversation = ((ConversationCell)sender).Conversation;
 			}
 		}
     }

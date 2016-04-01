@@ -103,6 +103,7 @@
   <ItemGroup>
     <InterfaceDefinition Include="Main.storyboard" />
     <InterfaceDefinition Include="Settings.storyboard" />
+    <InterfaceDefinition Include="ContactSearchBar.xib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -128,7 +129,12 @@
     <Compile Include="ConversationViewController.designer.cs">
       <DependentUpon>ConversationViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="ObserverTableViewController.cs" />
+    <Compile Include="BoundTableViewController.cs" />
+    <Compile Include="ContactSearchBar.cs" />
+    <Compile Include="ContactSearchBar.designer.cs">
+      <DependentUpon>ContactSearchBar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="iOSExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\settings%402x.png" />

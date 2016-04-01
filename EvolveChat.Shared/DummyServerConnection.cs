@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace EvolveChat {
 
@@ -16,7 +17,8 @@ namespace EvolveChat {
 			new Contact { FirstName = "Kate", LastName = "Bell" },
 			new Contact { FirstName = "Johnny", LastName = "Appleseed" },
 			new Contact { FirstName = "John", LastName = "Doe" },
-			// ...
+			new Contact { FirstName = "Steve", LastName = "Jobs" },
+			new Contact { FirstName = "Bill", LastName = "Gates" },
 		};
 
 		static readonly Conversation [] dummyConversations = new[] {
@@ -36,86 +38,96 @@ namespace EvolveChat {
 
 		public Contact Me => me;
 
-		public IObservable<Contact> FindContacts (string searchTerm)
+		public ObservableCollection<Contact> FindContacts (IObservable<string> searchTerm)
 		{
-			return new DummyContactObservable (searchTerm);
+			var results = new ObservableCollection<Contact> ();
+			searchTerm.Subscribe (new ContactSearchObserver (results));
+			return results;
 		}
-		class DummyContactObservable : IObservable<Contact>, IDisposable {
+		class ContactSearchObserver : IObserver<string> {
 
-			bool disposed;
-			List<Contact> contacts;
+			bool stop;
+			int counter;
+			ObservableCollection<Contact> results;
 
-			public DummyContactObservable (string searchTerm)
+			public ContactSearchObserver (ObservableCollection<Contact> results)
 			{
-				contacts = dummyContacts
-					.Where (c => c.FirstName.Contains (searchTerm) || c.LastName.Contains (searchTerm))
-					.ToList ();
+				this.results = results;
 			}
 
-			public IDisposable Subscribe (IObserver<Contact> obs)
+			public async void OnNext (string searchTerm)
 			{
-				YieldData (obs);
-				return this;
-			}
+				// This would update the query on the server to return matches for the new searchTerm...
+				var oldItems = results.ToArray ();
+				var newItems = dummyContacts
+						.Where (c => c.FirstName.ToLowerInvariant ().Contains (searchTerm.ToLowerInvariant ()) || 
+						             c.LastName.ToLowerInvariant ().Contains (searchTerm.ToLowerInvariant ()))
+						.ToList ();
 
-			async void YieldData (IObserver<Contact> obs)
-			{
-				foreach (var contact in contacts.ToArray ()) {
-					await Task.Delay (250);
-					if (disposed)
-						return;
-					obs.OnNext (contact);
-					contacts.Remove (contact);
+				// Remove items that no longer match the search term
+				foreach (var item in oldItems) {
+					if (!newItems.Contains (item))
+						results.Remove (item);
 				}
-				obs.OnCompleted ();
+
+				// Add new items that now match the search term
+				// Use a counter to bail if a new searchTerm comes in while we're yielded
+				var lastCount = ++counter;
+				foreach (var item in newItems) {
+					await Task.Delay (1000);
+					if (stop || lastCount != counter)
+						return;
+					oldItems = results.ToArray ();
+					if (!oldItems.Contains (item))
+						results.Add (item);
+				}
 			}
 
-			public void Dispose ()
+			public void Stop ()
 			{
-				disposed = true;
+				// This would cancel the query on the server...
+				stop = true;
+			}
+
+			public void OnCompleted ()
+			{
+				Stop ();
+			}
+			public void OnError (Exception error)
+			{
+				// IRL we'd prolly log the error.
+				Stop ();
 			}
 		}
 
-		public IObservable<Conversation> GetMyConversations ()
+		// On a real IServerConnection, we'd prolly also want to keep this as a local cache of data.
+		ObservableCollection<Conversation> myConversations;
+
+		public ObservableCollection<Conversation> GetMyConversations ()
 		{
-			return new DummyConversationObservable ();
+			if (myConversations == null) {
+				myConversations = new ObservableCollection<Conversation> ();
+				YieldConversations ();
+			}
+			return myConversations;
 		}
-		class DummyConversationObservable : IObservable<Conversation>, IDisposable {
-
-			bool disposed;
-			List<Conversation> conversations;
-
-			public DummyConversationObservable ()
-			{
-				conversations = dummyConversations.ToList ();
+		async void YieldConversations ()
+		{
+			foreach (var convo in dummyConversations) {
+				await Task.Delay (500);
+				myConversations.Add (convo);
 			}
+		}
 
-			public IDisposable Subscribe (IObserver<Conversation> obs)
-			{
-				YieldData (obs);
-				return this;
+		public async Task<Conversation> StartConversation (params Contact [] contacts)
+		{
+			await Task.Delay (500);
+			var convo = dummyConversations.FirstOrDefault (c => c.Participants.Where (p => p != Me).SequenceEqual (contacts));
+			if (convo == null) {
+				convo = new Conversation (contacts);
+				myConversations.Add (convo);
 			}
-
-			async void YieldData (IObserver<Conversation> obs)
-			{
-				foreach (var convo in conversations.ToArray ()) {
-					await Task.Delay (250);
-					if (disposed)
-						return;
-					obs.OnNext (convo);
-					conversations.Remove (convo);
-				}
-				obs.OnCompleted ();
-				
-				// The following is just to test different UI bindings..
-				await Task.Delay (2000);
-				dummyConversations [0].Messages.Add (new Message (DateTime.UtcNow, dummyContacts [2], "Hey guys!")); 
-			}
-
-			public void Dispose ()
-			{
-				disposed = true;
-			}
+			return convo;
 		}
 	}
 }
