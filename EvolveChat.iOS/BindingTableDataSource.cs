@@ -10,10 +10,12 @@ using System.Collections.Specialized;
 
 namespace EvolveChat {
 
+	public delegate UITableViewCell GetCellCallback (UITableView tableView, NSIndexPath indexPath, object data);
+
 	/// <summary>
-	/// A <c>UITableViewController</c> that can be bound to an observable collection.
+	/// A <c>UITableViewDataSource</c> that can be bound to an observable collection.
 	/// </summary>
-	public abstract class BoundTableViewController : UITableViewController {
+	public class BindingTableDataSource : UITableViewDataSource {
 
 		public IList Binding {
 			get { return binding; }
@@ -27,26 +29,29 @@ namespace EvolveChat {
 					inpc = binding as INotifyCollectionChanged;
 					if (inpc != null)
 						inpc.CollectionChanged += OnCollectionChanged;
-					if (IsViewLoaded)
+					if (TableView.DataSource == this)
 						TableView.ReloadData ();
 				}
 			}
 		}
 		IList binding;
 
-		public BoundTableViewController ()
-		{
+		public UITableView TableView {
+			get;
+			private set;
 		}
 
-		public BoundTableViewController (IntPtr handle): base (handle)
+		GetCellCallback getCell;
+
+		public BindingTableDataSource (UITableView tableView, GetCellCallback getCell)
 		{
+			this.TableView = tableView;
+			this.getCell = getCell;
 		}
 
 		void OnCollectionChanged (object sender, NotifyCollectionChangedEventArgs e)
 		{
 			BeginInvokeOnMainThread (() => {
-				if (!IsViewLoaded)
-					return;
 				NSIndexPath [] indexPaths;
 				switch (e.Action) {
 
@@ -89,10 +94,8 @@ namespace EvolveChat {
 
 		public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
 		{
-			return GetCell (tableView, indexPath, GetData (indexPath));
+			return getCell (tableView, indexPath, GetData (indexPath));
 		}
-
-		protected abstract UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, object data);		
 	}
 }
 

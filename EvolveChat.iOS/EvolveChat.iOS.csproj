@@ -129,7 +129,7 @@
     <Compile Include="ConversationViewController.designer.cs">
       <DependentUpon>ConversationViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="BoundTableViewController.cs" />
+    <Compile Include="BindingTableDataSource.cs" />
     <Compile Include="ContactSearchBar.cs" />
     <Compile Include="ContactSearchBar.designer.cs">
       <DependentUpon>ContactSearchBar.cs</DependentUpon>

@@ -7,7 +7,7 @@ using Foundation;
 
 namespace EvolveChat {
 
-    public partial class ConversationListViewController : BoundTableViewController {
+    public partial class ConversationListViewController : UITableViewController {
 
 		public ConversationListViewController (IntPtr handle) : base (handle)
 		{
@@ -17,10 +17,13 @@ namespace EvolveChat {
 		{
 			base.ViewDidLoad ();
 			TableView.EstimatedRowHeight = 50;
-			Binding = App.Backend.GetMyConversations ();
+
+			TableView.DataSource = new BindingTableDataSource (TableView, GetCell) {
+				Binding = App.Backend.GetMyConversations ()
+			};
 		}
 
-		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, object data)
+		protected UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, object data)
 		{
 			var cell = (ConversationCell)tableView.DequeueReusableCell (ConversationCell.Id, indexPath);
 			cell.Conversation = (Conversation)data;
@@ -34,6 +37,11 @@ namespace EvolveChat {
 				var dest = (ConversationViewController)segue.DestinationViewController;
 				dest.Conversation = ((ConversationCell)sender).Conversation;
 			}
+		}
+
+		[Export ("OnUnwind:")]
+		public void OnUnwind (UIStoryboardSegue seg)
+		{
 		}
     }
 }

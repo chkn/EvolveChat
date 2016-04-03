@@ -1,10 +1,6 @@
 using System;
 using System.Linq;
-using System.Collections.ObjectModel;
-
 using System.Threading;
-
-using System.Reactive;
 using System.Reactive.Linq;
 
 using UIKit;
@@ -12,7 +8,7 @@ using Foundation;
 
 namespace EvolveChat {
 
-	public partial class ConversationViewController : BoundTableViewController {
+	public partial class ConversationViewController : UIViewController, IUITableViewDelegate {
 
 		static readonly NSString contactCellId = new NSString ("ContactCell");
 		static readonly NSString contactHeaderId = new NSString ("ContactHeader");
@@ -22,28 +18,17 @@ namespace EvolveChat {
 			set {
 				if (conversation != value) {
 					conversation = value;
-					if (titleSubscription != null) {
-						titleSubscription.Dispose ();
-						titleSubscription = null;
-					}
-					if (conversation != null) {
-						Binding = conversation.Messages;
-						// If someone joins the conversation, we'll update the title..
-						titleSubscription = conversation.ObservePropertyValue (c => c.Participants)
-							.ObserveOn (SynchronizationContext.Current)
-							.Subscribe (participants =>
-								Title = string.Join (", ", participants.Where (p => p != App.Backend.Me))
-							);
-					} else {
-						Binding = null;
-					}
+					SetTitleBinding ();
+					SetDataBinding ();
 				}
 			}
 		}
-		Conversation conversation;
-		IDisposable titleSubscription;
 
 		public bool IsSelectingContacts => (Conversation == null);
+		public BindingTableDataSource DataSource => TableView?.DataSource as BindingTableDataSource;
+
+		IDisposable titleBinding;
+		Conversation conversation;
 
 		public ConversationViewController (IntPtr handle) : base (handle)
 		{
@@ -52,6 +37,10 @@ namespace EvolveChat {
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
+			TableView.Delegate = this;
+			TableView.DataSource = new BindingTableDataSource (TableView, GetCell);
+			SetDataBinding ();
+
 			TableView.RegisterNibForHeaderFooterViewReuse (UINib.FromName ("ContactSearchBar", null), contactHeaderId);
 			TableView.RowHeight = UITableView.AutomaticDimension;
 			TableView.EstimatedRowHeight = 44;
@@ -69,23 +58,43 @@ namespace EvolveChat {
 			Conversation = null;
 		}
 
-		public override nfloat GetHeightForHeader (UITableView tableView, nint section)
+		void SetDataBinding ()
+		{
+			var ds = DataSource;
+			if (ds != null)
+				ds.Binding = Conversation?.Messages;
+		}
+
+		void SetTitleBinding ()
+		{
+			// If someone joins the conversation, we'll update the title..
+			titleBinding?.Dispose ();
+			titleBinding = Conversation?.ObservePropertyValue (c => c.Participants)
+				.ObserveOn (SynchronizationContext.Current)
+				.Subscribe (participants =>
+					Title = string.Join (", ", participants.Where (p => p != App.Backend.Me))
+				);
+		}
+
+		[Export ("tableView:heightForHeaderInSection:")]
+		public nfloat GetHeightForHeader (UITableView tableView, nint section)
 		{
 			return IsSelectingContacts? 40 : 0;
 		}
 
-		public override UIView GetViewForHeader (UITableView tableView, nint section)
+		[Export ("tableView:viewForHeaderInSection:")]
+		public UIView GetViewForHeader (UITableView tableView, nint section)
 		{
 			ContactSearchBar header = null;
 			if (IsSelectingContacts) {
 				header = (ContactSearchBar)tableView.DequeueReusableHeaderFooterView (contactHeaderId);
-				Binding = App.Backend.FindContacts (header.TextField.ObserveText ());
+				DataSource.Binding = App.Backend.FindContacts (header.TextField.ObserveText ());
 				header.TextField.BecomeFirstResponder ();
 			}
 			return header;
 		}
 
-		protected override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, object data)
+		protected UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, object data)
 		{
 			var msg = data as Message;
 			if (msg != null) {
@@ -104,13 +113,14 @@ namespace EvolveChat {
 			throw new NotImplementedException (data.GetType ().FullName);
 		}
 
-		public override async void RowSelected (UITableView tableView, NSIndexPath indexPath)
+		[Export ("tableView:didSelectRowAtIndexPath:")]
+		public async void RowSelected (UITableView tableView, NSIndexPath indexPath)
 		{
 			// Resign first responder on the header so it can go away
 			View.EndEditing (true);
 
 			// Get the contact that was selected
-			var contact = (Contact)GetData (indexPath);
+			var contact = (Contact)DataSource.GetData (indexPath);
 
 			// Show a loading view controller and load the conversation
 			var vc = Storyboard.InstantiateViewController ("LoadingViewController");
