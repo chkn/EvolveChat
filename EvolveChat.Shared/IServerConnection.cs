@@ -17,8 +17,7 @@ namespace EvolveChat {
 		/// </summary>
 		/// <remarks>
 		/// The returned <c>Contact</c> objects should be configured so that any
-		///  changes on the server will be propagated to the local <c>Contact</c> object
-		///  as long as the returned observable has subscriptions on it.
+		///  changes on the server will be propagated to the local <c>Contact</c> object.
 		/// </remarks>
 		/// <returns>An observable collection of matching contacts. As more contacts are found
 		///   on the server, or as the searchTerm changes, the collection should be updated.</returns>
@@ -38,7 +37,7 @@ namespace EvolveChat {
 		ObservableCollection<Conversation> GetMyConversations ();
 
 		/// <summary>
-		/// Starts or resumes a conversation with the given contact.
+		/// Starts or resumes a conversation with the given contact(s).
 		/// </summary>
 		/// <remarks>
 		/// This is a synchronization point that can be used to ensure
