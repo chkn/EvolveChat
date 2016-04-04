@@ -46,7 +46,7 @@
                                     <subviews>
                                         <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="AC" textAlignment="center" lineBreakMode="tailTruncation" minimumFontSize="10" translatesAutoresizingMaskIntoConstraints="NO" id="109">
                                             <rect key="frame" x="12" y="2" width="40" height="40"/>
-                                            <color key="backgroundColor" red="0.40000000000000002" green="0.85098039215686272" blue="0.15294117647058825" alpha="1" colorSpace="calibratedRGB"/>
+                                            <color key="backgroundColor" colorSpace="calibratedRGB" red="0.77254901960784317" green="0.77254901960784317" blue="0.77254901960784317" alpha="1"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="40" id="111"/>
                                                 <constraint firstAttribute="height" constant="40" id="112"/>

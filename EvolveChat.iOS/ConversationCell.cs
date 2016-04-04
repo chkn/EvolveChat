@@ -15,16 +15,6 @@ namespace EvolveChat {
 
 		public static readonly NSString Id = new NSString ("ConversationCell");
 
-		static UIColor [] colors = new[] {
-			UIColor.Green,
-			UIColor.Purple,
-			UIColor.Orange,
-			UIColor.Brown,
-			UIColor.LightGray,
-			UIColor.Yellow
-		};
-		static int lastColorIndex;
-
 		List<IDisposable> disposables = new List<IDisposable> ();
 
 		public Conversation Conversation {
@@ -71,10 +61,6 @@ namespace EvolveChat {
 								);
 							})
 					);
-
-					// Set a random background color for the badge
-					badge.BackgroundColor = colors [lastColorIndex];
-					lastColorIndex = (lastColorIndex + 1) % colors.Length;
 				}
 			}
 		}
