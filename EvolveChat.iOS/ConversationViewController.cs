@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 
 using UIKit;
 using Foundation;
+using CoreGraphics;
 
 namespace EvolveChat {
 
@@ -29,6 +30,7 @@ namespace EvolveChat {
 
 		IDisposable titleBinding;
 		Conversation conversation;
+		NSObject keyboardObserver;
 
 		public ConversationViewController (IntPtr handle) : base (handle)
 		{
@@ -44,18 +46,51 @@ namespace EvolveChat {
 			TableView.RegisterNibForHeaderFooterViewReuse (UINib.FromName ("ContactSearchBar", null), contactHeaderId);
 			TableView.RowHeight = UITableView.AutomaticDimension;
 			TableView.EstimatedRowHeight = 44;
+
+			var ci = TableView.ContentInset;
+			ci.Bottom += messageEntry.Frame.Height;
+			TableView.ContentInset = ci;
 		}
 
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
 			TableView.AllowsSelection = IsSelectingContacts;
+			sendButton.Enabled = !IsSelectingContacts;
+			keyboardObserver = NSNotificationCenter.DefaultCenter.AddObserver (UIKeyboard.WillChangeFrameNotification, OnKeyboardChangeFrame);
 		}
 
 		public override void ViewDidDisappear (bool animated)
 		{
 			base.ViewDidDisappear (animated);
-			Conversation = null;
+			NSNotificationCenter.DefaultCenter.RemoveObserver (keyboardObserver, UIKeyboard.WillChangeFrameNotification, null);
+		}
+
+		void OnKeyboardChangeFrame (NSNotification obj)
+		{
+			var frame = View.ConvertRectFromView (UIKeyboard.FrameEndFromNotification (obj), null);
+			var offset = View.Bounds.Height - frame.Y;
+			messageEntryBottom.Constant = offset - BottomLayoutGuide.Length;
+
+			var curve = UIKeyboard.AnimationCurveFromNotification (obj);
+			UIView.Animate (
+				duration: UIKeyboard.AnimationDurationFromNotification (obj),
+				delay: 0,
+				options: (UIViewAnimationOptions)(curve << 16),
+				animation: () => {
+					View.LayoutIfNeeded ();
+					var ci = TableView.ContentInset;
+					ci.Bottom = offset + messageEntry.Frame.Height;
+					TableView.ContentInset = ci;
+				},
+				completion: null
+			);
+		}
+
+		partial void OnSendMessage (UIButton sender)
+		{
+			Conversation.Messages.Add (new Message (DateTime.UtcNow, App.Backend.Me, messageText.Text));
+			messageText.Text = "";
 		}
 
 		void SetDataBinding ()
@@ -128,6 +163,9 @@ namespace EvolveChat {
 
 			// Create or resume the converstion
 			Conversation = await App.Backend.StartConversation (contact);
+
+			// Enable send button
+			sendButton.Enabled = true;
 
 			// Dismiss the loading view controller
 			DismissViewController (false, null);

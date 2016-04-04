@@ -60,6 +60,8 @@ namespace EvolveChat {
 					                       .Select (i => NSIndexPath.FromRowSection (i, 0))
 					                       .ToArray ();
 					TableView.InsertRows (indexPaths, UITableViewRowAnimation.Automatic);
+					if (e.NewStartingIndex + e.NewItems.Count == Binding.Count)
+						TableView.ScrollToRow (indexPaths.Last (), UITableViewScrollPosition.Bottom, true);
 					return;
 
 				case NotifyCollectionChangedAction.Remove:
