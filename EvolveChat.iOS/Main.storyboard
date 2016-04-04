@@ -60,8 +60,8 @@
                                                 </userDefinedRuntimeAttribute>
                                             </userDefinedRuntimeAttributes>
                                         </label>
-                                        <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Alex Corrado" lineBreakMode="tailTruncation" minimumFontSize="10" translatesAutoresizingMaskIntoConstraints="NO" id="114">
-                                            <rect key="frame" x="62" y="5" width="476" height="19"/>
+                                        <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Alex Corrado" lineBreakMode="tailTruncation" minimumFontSize="10" translatesAutoresizingMaskIntoConstraints="NO" id="114" verticalCompressionResistancePriority="751">
+                                            <rect key="frame" x="62" y="5" width="476" height="20.5"/>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -74,8 +74,8 @@
                                             <color key="textColor" colorSpace="calibratedWhite" white="0.666666666666667" alpha="1"/>
                                             <nil key="highlightedColor"/>
                                         </label>
-                                        <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" verticalCompressionResistancePriority="751" text="&lt;No messages yet&gt;" lineBreakMode="tailTruncation" numberOfLines="3" minimumFontSize="10" translatesAutoresizingMaskIntoConstraints="NO" id="120">
-                                            <rect key="frame" x="62" y="24" width="113" height="14.5"/>
+                                        <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="&lt;No messages yet&gt;" lineBreakMode="tailTruncation" numberOfLines="3" minimumFontSize="10" translatesAutoresizingMaskIntoConstraints="NO" id="120">
+                                            <rect key="frame" x="62" y="25.5" width="500" height="13"/>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                             <color key="textColor" colorSpace="calibratedWhite" white="0.666666666666667" alpha="1"/>
@@ -93,6 +93,7 @@
                                         <constraint firstItem="120" firstAttribute="top" secondItem="114" secondAttribute="bottom" id="122"/>
                                         <constraint firstAttribute="bottom" secondItem="120" secondAttribute="bottom" constant="5" id="156"/>
                                         <constraint id="485" firstItem="117" firstAttribute="leading" secondItem="114" secondAttribute="trailing" constant="8"/>
+                                        <constraint id="820" firstItem="40" firstAttribute="trailing" secondItem="120" secondAttribute="trailing"/>
                                     </constraints>
                                 </tableViewCellContentView>
                                 <connections>

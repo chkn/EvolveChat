@@ -16,6 +16,7 @@ namespace EvolveChat {
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();
+			TableView.RowHeight = UITableView.AutomaticDimension;
 			TableView.EstimatedRowHeight = 50;
 
 			TableView.DataSource = new BindingTableDataSource (TableView, GetCell) {

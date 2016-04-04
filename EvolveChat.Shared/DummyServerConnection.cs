@@ -29,6 +29,7 @@ namespace EvolveChat {
 				new Message (DateTime.UtcNow.AddMinutes (-1), dummyContacts [0], "Sup"),
 				new Message (DateTime.UtcNow.AddMinutes (-1), me, "Not much"),
 				new Message (DateTime.UtcNow.AddMinutes (-1), dummyContacts [0], "Cool"),
+				new Message (DateTime.UtcNow.AddMinutes (-1), me, "This is a really long message to test that the preview and message bubbles wrap as expected. Hooray!")
 			},
 			new Conversation {
 				new Message (DateTime.UtcNow.AddMonths (-1), dummyContacts [1], "Hey!"),
