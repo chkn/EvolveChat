@@ -6,8 +6,8 @@ namespace EvolveChat {
 
 	public partial class MessageCell : UITableViewCell {
 
-		public static readonly NSString IncomingId = new NSString ("IncomingMessageCell");
-		public static readonly NSString OutgoingId = new NSString ("OutgoingMessageCell");
+		public static readonly NSString IncomingId = new NSString ("IncomingCell");
+		public static readonly NSString OutgoingId = new NSString ("OutgoingCell");
 
 		public Message Message {
 			get { return message; }

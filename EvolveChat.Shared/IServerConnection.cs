@@ -21,7 +21,7 @@ namespace EvolveChat {
 		/// </remarks>
 		/// <returns>An observable collection of matching contacts. As more contacts are found
 		///   on the server, or as the searchTerm changes, the collection should be updated.</returns>
-		ObservableCollection<Contact> FindContacts (IObservable<string> searchTerm);
+		ObservableCollection<Contact> GetContacts ();
 
 		/// <summary>
 		/// Gets all conversations on the server that include the currently authenticated user.
@@ -34,7 +34,7 @@ namespace EvolveChat {
 		/// </remarks>
 		/// <returns>An observable collection of matching conversations. As conversations
 		///  are started or ended on the server, the collection should be updated.</returns>
-		ObservableCollection<Conversation> GetMyConversations ();
+		ObservableCollection<Conversation> GetConversations ();
 
 		/// <summary>
 		/// Starts or resumes a conversation with the given contact(s).

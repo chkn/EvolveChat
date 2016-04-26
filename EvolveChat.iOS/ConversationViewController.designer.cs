@@ -34,10 +34,6 @@ namespace EvolveChat
         [GeneratedCode ("iOS Designer", "1.0")]
         UIKit.UITableView TableView { get; set; }
 
-        [Action ("UIButton809_TouchUpInside:")]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        partial void OnSendMessage (UIKit.UIButton sender);
-
         void ReleaseDesignerOutlets ()
         {
             if (messageEntry != null) {

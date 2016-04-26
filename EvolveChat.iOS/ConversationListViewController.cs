@@ -17,20 +17,20 @@ namespace EvolveChat {
 		{
 			base.ViewDidLoad ();
 			TableView.RowHeight = UITableView.AutomaticDimension;
-			TableView.EstimatedRowHeight = 50;
+			TableView.EstimatedRowHeight = 44;
 
 			TableView.DataSource = new BindingTableDataSource (TableView, GetCell) {
-				Binding = App.Backend.GetMyConversations ()
+				Binding = App.Backend.GetConversations ()
 			};
 		}
 
-		protected UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, object data)
+		protected virtual UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath, object data)
 		{
 			var cell = (ConversationCell)tableView.DequeueReusableCell (ConversationCell.Id, indexPath);
 			cell.Conversation = (Conversation)data;
 			return cell;
 		}
-
+		
 		public override void PrepareForSegue (UIStoryboardSegue segue, NSObject sender)
 		{
 			base.PrepareForSegue (segue, sender);
@@ -39,10 +39,5 @@ namespace EvolveChat {
 				dest.Conversation = ((ConversationCell)sender).Conversation;
 			}
 		}
-
-		[Export ("OnUnwind:")]
-		public void OnUnwind (UIStoryboardSegue seg)
-		{
-		}
-    }
+	}
 }

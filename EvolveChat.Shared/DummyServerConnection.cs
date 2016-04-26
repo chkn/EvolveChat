@@ -39,84 +39,39 @@ namespace EvolveChat {
 
 		public Contact Me => me;
 
-		public ObservableCollection<Contact> FindContacts (IObservable<string> searchTerm)
+		// On a real IServerConnection, we'd prolly also want to keep these as a local cache of data.
+		ObservableCollection<Contact> contacts;
+		ObservableCollection<Conversation> conversations;
+
+		public ObservableCollection<Contact> GetContacts ()
 		{
-			var results = new ObservableCollection<Contact> ();
-			searchTerm.Subscribe (new ContactSearchObserver (results));
-			return results;
+			if (contacts == null) {
+				contacts = new ObservableCollection<Contact> ();
+				YieldContacts ();
+			}
+			return contacts;
 		}
-		class ContactSearchObserver : IObserver<string> {
-
-			bool stop;
-			int counter;
-			ObservableCollection<Contact> results;
-
-			public ContactSearchObserver (ObservableCollection<Contact> results)
-			{
-				this.results = results;
-			}
-
-			public async void OnNext (string searchTerm)
-			{
-				// This would update the query on the server to return matches for the new searchTerm...
-				var oldItems = results.ToArray ();
-				var newItems = dummyContacts
-						.Where (c => c.FirstName.ToLowerInvariant ().Contains (searchTerm.ToLowerInvariant ()) || 
-						             c.LastName.ToLowerInvariant ().Contains (searchTerm.ToLowerInvariant ()))
-						.ToList ();
-
-				// Remove items that no longer match the search term
-				foreach (var item in oldItems) {
-					if (!newItems.Contains (item))
-						results.Remove (item);
-				}
-
-				// Add new items that now match the search term
-				// Use a counter to bail if a new searchTerm comes in while we're yielded
-				var lastCount = ++counter;
-				foreach (var item in newItems) {
-					await Task.Delay (1000);
-					if (stop || lastCount != counter)
-						return;
-					oldItems = results.ToArray ();
-					if (!oldItems.Contains (item))
-						results.Add (item);
-				}
-			}
-
-			public void Stop ()
-			{
-				// This would cancel the query on the server...
-				stop = true;
-			}
-
-			public void OnCompleted ()
-			{
-				Stop ();
-			}
-			public void OnError (Exception error)
-			{
-				// IRL we'd prolly log the error.
-				Stop ();
+		async void YieldContacts ()
+		{
+			foreach (var contact in dummyContacts) {
+				await Task.Delay (500);
+				contacts.Add (contact);
 			}
 		}
 
-		// On a real IServerConnection, we'd prolly also want to keep this as a local cache of data.
-		ObservableCollection<Conversation> myConversations;
-
-		public ObservableCollection<Conversation> GetMyConversations ()
+		public ObservableCollection<Conversation> GetConversations ()
 		{
-			if (myConversations == null) {
-				myConversations = new ObservableCollection<Conversation> ();
+			if (conversations == null) {
+				conversations = new ObservableCollection<Conversation> ();
 				YieldConversations ();
 			}
-			return myConversations;
+			return conversations;
 		}
 		async void YieldConversations ()
 		{
 			foreach (var convo in dummyConversations) {
 				await Task.Delay (500);
-				myConversations.Add (convo);
+				conversations.Add (convo);
 			}
 		}
 
@@ -126,7 +81,7 @@ namespace EvolveChat {
 			var convo = dummyConversations.FirstOrDefault (c => c.Participants.Where (p => p != Me).SequenceEqual (contacts));
 			if (convo == null) {
 				convo = new Conversation (contacts);
-				myConversations.Add (convo);
+				conversations.Add (convo);
 			}
 			return convo;
 		}
